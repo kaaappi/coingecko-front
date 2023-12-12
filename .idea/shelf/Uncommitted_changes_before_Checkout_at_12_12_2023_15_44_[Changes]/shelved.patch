@@ -1,0 +1,242 @@
+Index: src/components/Chart/LineChart.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React, { FC } from \"react\";\r\nimport { Bar } from \"react-chartjs-2\";\r\n\r\ninterface IChart {\r\n  chartData: any;\r\n}\r\n\r\nconst LineChart: FC<IChart> = ({ chartData }) => {\r\n  return <Bar data={chartData} />;\r\n};\r\n\r\nexport default LineChart;\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/components/Chart/LineChart.tsx b/src/components/Chart/LineChart.tsx
+--- a/src/components/Chart/LineChart.tsx	(revision 4f8a53cbe9f61be6a26118843743bb57cac66ab0)
++++ b/src/components/Chart/LineChart.tsx	(date 1702388612772)
+@@ -1,12 +1,111 @@
+-import React, { FC } from "react";
+-import { Bar } from "react-chartjs-2";
++import React, { FC, useEffect, useState } from "react";
++import axios from "axios";
++import { PricesDataState } from "../../types/coin";
++import {
++  Chart as ChartJS,
++  CategoryScale,
++  LinearScale,
++  PointElement,
++  LineElement,
++  Title,
++  Tooltip,
++  Legend,
++} from "chart.js";
++import { Line } from "react-chartjs-2";
++
++ChartJS.register(
++  CategoryScale,
++  LinearScale,
++  PointElement,
++  LineElement,
++  Title,
++  Tooltip,
++  Legend
++);
++
++const options = {
++  responsive: true,
++  scales: {
++    x: {
++      display: true,
++      grid: {
++        color: "rgb(51, 65, 85)",
++      },
++      color: "red",
++    },
++    y: {
++      display: true,
++      grid: {
++        color: "rgb(51, 65, 85)",
++      },
++    },
++  },
++};
+ 
+-interface IChart {
+-  chartData: any;
++function format_time(s: number) {
++  return new Date(s)
++    .toLocaleDateString("ua", {
++      year: "numeric",
++      month: "numeric",
++      day: "numeric",
++    })
++    .replaceAll("/", ".");
+ }
+ 
+-const LineChart: FC<IChart> = ({ chartData }) => {
+-  return <Bar data={chartData} />;
+-};
++interface ILineChart {
++  coin_id?: string;
++  days: number;
++}
++
++const LineChart: FC<ILineChart> = ({ coin_id, days }) => {
++  const [dataForChart, setDataForChart] = useState<number[][]>();
++  const [chartData, setChartData] = useState<any>({
++    datasets: [],
++    labels: [],
++  });
++
++  useEffect(() => {
++    if (dataForChart && dataForChart.length >= 1) {
++      setChartData({
++        labels: dataForChart.map((data) => format_time(data[0])),
++        datasets: [
++          {
++            data: dataForChart.map((data) => data[1]),
++            borderWidth: 2,
++            label: `${coin_id}`,
++            pointStyle: false,
++            borderColor: "rgba(75, 192, 192, 1)",
++            options: {
++              plugins: {
++                title: {
++                  display: true,
++                  text: "Grid Line Settings",
++                },
++              },
++            },
++          },
++        ],
++      });
++    }
++  }, [dataForChart]);
++
++  useEffect(() => {
++    fetchPricesData();
++  }, [days]);
++
++  async function fetchPricesData() {
++    try {
++      const response = await axios.get<PricesDataState>(
++        `localhost:4000/getChartForCoin/${coin_id}/${days}`
++      );
++      setDataForChart(response.data.prices);
++    } catch (e) {
++      alert(e);
++    }
++  }
+ 
++  return (
++    <Line data={chartData} width={"800px"} height={"600px"} options={options} />
++  );
++};
+ export default LineChart;
+Index: README.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># Getting Started with Create React App\r\n\r\nThis project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).\r\n\r\n## Available Scripts\r\n\r\nIn the project directory, you can run:\r\n\r\n### `npm start`\r\n\r\nRuns the app in the development mode.\\\r\nOpen [http://localhost:3000](http://localhost:3000) to view it in the browser.\r\n\r\nThe page will reload if you make edits.\\\r\nYou will also see any lint errors in the console.\r\n\r\n### `npm test`\r\n\r\nLaunches the test runner in the interactive watch mode.\\\r\nSee the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.\r\n\r\n### `npm run build`\r\n\r\nBuilds the app for production to the `build` folder.\\\r\nIt correctly bundles React in production mode and optimizes the build for the best performance.\r\n\r\nThe build is minified and the filenames include the hashes.\\\r\nYour app is ready to be deployed!\r\n\r\nSee the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.\r\n\r\n### `npm run eject`\r\n\r\n**Note: this is a one-way operation. Once you `eject`, you can’t go back!**\r\n\r\nIf you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.\r\n\r\nInstead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.\r\n\r\nYou don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.\r\n\r\n## Learn More\r\n\r\nYou can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).\r\n\r\nTo learn React, check out the [React documentation](https://reactjs.org/).\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/README.md b/README.md
+--- a/README.md	(revision 4f8a53cbe9f61be6a26118843743bb57cac66ab0)
++++ b/README.md	(date 1702388612767)
+@@ -1,46 +1,0 @@
+-# Getting Started with Create React App
+-
+-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+-
+-## Available Scripts
+-
+-In the project directory, you can run:
+-
+-### `npm start`
+-
+-Runs the app in the development mode.\
+-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+-
+-The page will reload if you make edits.\
+-You will also see any lint errors in the console.
+-
+-### `npm test`
+-
+-Launches the test runner in the interactive watch mode.\
+-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+-
+-### `npm run build`
+-
+-Builds the app for production to the `build` folder.\
+-It correctly bundles React in production mode and optimizes the build for the best performance.
+-
+-The build is minified and the filenames include the hashes.\
+-Your app is ready to be deployed!
+-
+-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+-
+-### `npm run eject`
+-
+-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+-
+-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+-
+-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+-
+-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+-
+-## Learn More
+-
+-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+-
+-To learn React, check out the [React documentation](https://reactjs.org/).
+Index: package.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{\r\n  \"name\": \"coins-try-fix\",\r\n  \"version\": \"0.1.0\",\r\n  \"private\": true,\r\n  \"dependencies\": {\r\n    \"@testing-library/jest-dom\": \"^5.16.5\",\r\n    \"@testing-library/react\": \"^13.4.0\",\r\n    \"@testing-library/user-event\": \"^13.5.0\",\r\n    \"@types/jest\": \"^27.5.2\",\r\n    \"@types/node\": \"^16.18.38\",\r\n    \"@types/react\": \"^18.2.15\",\r\n    \"@types/react-dom\": \"^18.2.7\",\r\n    \"@types/react-router-dom\": \"^5.3.3\",\r\n    \"axios\": \"^1.4.0\",\r\n    \"chart.js\": \"^4.3.3\",\r\n    \"react\": \"^18.2.0\",\r\n    \"react-chartjs-2\": \"^5.2.0\",\r\n    \"react-dom\": \"^18.2.0\",\r\n    \"react-redux\": \"^8.1.1\",\r\n    \"react-router-dom\": \"^6.14.2\",\r\n    \"react-scripts\": \"5.0.1\",\r\n    \"redux\": \"^4.2.1\",\r\n    \"redux-thunk\": \"^2.4.2\",\r\n    \"typescript\": \"^4.9.5\",\r\n    \"web-vitals\": \"^2.1.4\"\r\n  },\r\n  \"scripts\": {\r\n    \"start\": \"react-scripts start\",\r\n    \"build\": \"react-scripts build\",\r\n    \"test\": \"react-scripts test\",\r\n    \"eject\": \"react-scripts eject\"\r\n  },\r\n  \"eslintConfig\": {\r\n    \"extends\": [\r\n      \"react-app\",\r\n      \"react-app/jest\"\r\n    ]\r\n  },\r\n  \"browserslist\": {\r\n    \"production\": [\r\n      \">0.2%\",\r\n      \"not dead\",\r\n      \"not op_mini all\"\r\n    ],\r\n    \"development\": [\r\n      \"last 1 chrome version\",\r\n      \"last 1 firefox version\",\r\n      \"last 1 safari version\"\r\n    ]\r\n  }\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/package.json b/package.json
+--- a/package.json	(revision 4f8a53cbe9f61be6a26118843743bb57cac66ab0)
++++ b/package.json	(date 1702388612769)
+@@ -12,12 +12,19 @@
+     "@types/react-dom": "^18.2.7",
+     "@types/react-router-dom": "^5.3.3",
+     "axios": "^1.4.0",
++    "bcryptjs": "^2.4.3",
++    "body-parser": "^1.20.2",
+     "chart.js": "^4.3.3",
++    "express": "^4.18.2",
++    "express-validator": "^7.0.1",
++    "jsonwebtoken": "^9.0.2",
++    "mongoose": "^7.5.0",
+     "react": "^18.2.0",
+     "react-chartjs-2": "^5.2.0",
+     "react-dom": "^18.2.0",
++    "react-error-boundary": "^4.0.11",
+     "react-redux": "^8.1.1",
+-    "react-router-dom": "^6.14.2",
++    "react-router-dom": "^6.20.1",
+     "react-scripts": "5.0.1",
+     "redux": "^4.2.1",
+     "redux-thunk": "^2.4.2",
+@@ -28,7 +35,8 @@
+     "start": "react-scripts start",
+     "build": "react-scripts build",
+     "test": "react-scripts test",
+-    "eject": "react-scripts eject"
++    "eject": "react-scripts eject",
++    "dev": "nodemon index.tsx"
+   },
+   "eslintConfig": {
+     "extends": [
+@@ -47,5 +55,13 @@
+       "last 1 firefox version",
+       "last 1 safari version"
+     ]
+-  }
++  },
++  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
++  "main": "index.tsx",
++  "author": "",
++  "license": "ISC",
++  "devDependencies": {
++    "nodemon": "^3.0.1"
++  },
++  "keywords": []
+ }
