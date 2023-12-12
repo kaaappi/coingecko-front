@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/coingeckoCopy/static/css/main.591e85c3.css",
+    "main.js": "/coingeckoCopy/static/js/main.e0bd373a.js",
+    "index.html": "/coingeckoCopy/index.html",
+    "main.591e85c3.css.map": "/coingeckoCopy/static/css/main.591e85c3.css.map",
+    "main.e0bd373a.js.map": "/coingeckoCopy/static/js/main.e0bd373a.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.591e85c3.css",
+    "static/js/main.e0bd373a.js"
+  ]
+}
